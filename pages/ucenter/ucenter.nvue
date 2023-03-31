@@ -1,0 +1,221 @@
+<template>
+	<view class="logo" @click="goLogin" :hover-class="!login ? 'logo-hover' : ''">
+		<image class="logo-img" :src="login ? uerInfo.avatarUrl :avatarUrl"></image>
+		<view class="logo-title">
+			<text class="uer-name">Hi，{{login ? uerInfo.name : '您未登录'}}</text>
+			<text class="go-login-navigat-arrow navigat-arrow" v-if="!login">&#xe65e;</text>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				login: false,
+				avatarUrl: '/static/logo.png',
+				uerInfo: {}
+			}
+		},
+		methods: {
+			goLogin() {
+				if (!this.login) {
+					console.log('点击前往登录8');
+					uni.login({ 
+						"provider": "weixin",
+						"onlyAuthorize": true, // 微信登录仅请求授权认证
+						success: function(event){
+							console.log(event)
+							const {code} = event
+							console.log(event.code)
+							//客户端成功获取授权临时票据（code）,向业务服务器发起登录请求。
+							// uni.request({
+							//     url: 'http://localhost:7071/api/wechat/jscode2openid',
+							//     data: {
+							//         jscode: event.code
+							//     },
+							//     success: (res) => {
+							// 			console.log(res)
+							// 			uni.request({
+							// 			    url: 'http://localhost:7071/api/wechat/wechatLogin',
+							// 					method: 'POST',
+							// 			    data: {
+							// 			        mpOpenId: res.data.result
+							// 			    },
+							// 			    success: (res) => {
+							// 						console.log(res)
+							// 						//获得token完成登录
+							// 						uni.setStorageSync('token',res.result)
+							// 			    }
+							// 			});
+							//     }
+							// });
+							uni.login({
+								provider: "weixin",
+								success: (weixinRes) => {
+									uni.$ajax("/wechat/jscode2openid", {jscode:event.code}).then(res => {
+										console.log(res)
+										if (res.data.code == 0) {
+											uni.$ajax.post("/wechat/wechatLogin", {mpOpenId: res.data.result}).then(res => {
+												if (res.data.code === 0) {
+													uni.setStorage({
+														key: "TOKEN",
+														data: res.data.result,
+													});
+													// // 将用户的信息存入缓存中
+													// uni.setStorage({
+													// 	key: "userInfo",
+													// 	data: res.data,
+													// 	success: () => {
+													// 		if (this.pageRouter) {
+													// 			uni.reLaunch({
+													// 				url: this.pageRouter,
+													// 			});
+													// 		} else {
+													// 			uni.reLaunch({
+													// 				url: "../user/user",
+													// 			});
+													// 		}
+													// 	},
+													// });
+												} else {
+													uni.showToast({
+														icon: "none",
+														title: res.message,
+													});
+												}
+											});
+										} else {
+											uni.showModal({
+												title: "授权失败",
+												content: res.message,
+											});
+										}
+									});
+								},
+							});
+						},
+						fail: function (err) {
+							console.log(err.code)
+					        // 登录授权失败  
+					        // err.code是错误码
+					    }
+					})
+				}
+			}
+		}
+	}
+</script>
+
+<style>
+	/* 解决头条小程序字体图标不显示问题，因为头条运行时自动插入了span标签，且有全局字体 */
+	/* #ifdef MP-TOUTIAO */
+	text :not(view) {
+		font-family: texticons;
+	}
+
+	/* #endif */
+
+	.center {
+		flex: 1;
+		flex-direction: column;
+		background-color: #f8f8f8;
+	}
+
+	.logo {
+		width: 750upx;
+		height: 240upx;
+		padding: 20upx;
+		background-color: #2F85FC;
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.logo-hover {
+		opacity: 0.8;
+	}
+
+	.logo-img {
+		width: 150upx;
+		height: 150upx;
+		border-radius: 150upx;
+	}
+
+	.logo-title {
+		height: 150upx;
+		flex: 1;
+		align-items: center;
+		justify-content: space-between;
+		flex-direction: row;
+		margin-left: 20upx;
+	}
+
+	.uer-name {
+		height: 60upx;
+		line-height: 60upx;
+		font-size: 38upx;
+		color: #FFFFFF;
+	}
+
+	.go-login-navigat-arrow {
+		font-size: 38upx;
+		color: #FFFFFF;
+	}
+
+	.login-title {
+		height: 150upx;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		margin-left: 20upx;
+	}
+
+	.center-list {
+		flex-direction: column;
+		background-color: #FFFFFF;
+		margin-top: 20upx;
+		width: 750upx;
+	}
+
+	.center-list-item {
+		height: 90upx;
+		width: 750upx;
+		flex-direction: row;
+		padding: 0upx 20upx;
+	}
+
+	.border-bottom {
+		border-bottom-width: 1upx;
+		border-color: #c8c7cc;
+		border-bottom-style: solid;
+	}
+
+	.list-icon {
+		width: 40upx;
+		height: 90upx;
+		line-height: 90upx;
+		font-size: 34upx;
+		color: #2F85FC;
+		text-align: center;
+		font-family: texticons;
+		margin-right: 20upx;
+	}
+
+	.list-text {
+		height: 90upx;
+		line-height: 90upx;
+		font-size: 34upx;
+		color: #555;
+		flex: 1;
+	}
+
+	.navigat-arrow {
+		height: 90upx;
+		width: 40upx;
+		line-height: 90upx;
+		font-size: 34upx;
+		color: #555;
+		text-align: right;
+		font-family: texticons;
+	}
+</style>
