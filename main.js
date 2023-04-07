@@ -1,7 +1,16 @@
 import App from './App'
 import request from '@/common/request'
+import zConfig from '@/uni_modules/z-paging/components/z-paging/js/z-paging-config'
 
 uni.$ajax = request
+
+zConfig.setConfig({
+	//配置分页默认pageSize为15
+	'default-page-size': '15',
+	//配置空数据图默认描述文字为：空空如也~~
+	'empty-view-text': '空空如也~~',
+	//...
+})
 
 // #ifndef VUE3
 import Vue from 'vue'

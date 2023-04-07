@@ -1,0 +1,184 @@
+<template>
+  <view class="content">
+    <view class="banner" auto-focus>
+      <!-- <image class="banner-img" :src="banner.image_url"></image> -->
+      <view class="title-area">
+        <text class="title-text">{{job.moduleName}}</text>
+      </view>
+    </view>
+    <view class="article-content">
+      <rich-text :nodes="job.title" style="font-size: 14px;">{{job.title}}</rich-text>
+    </view>
+		<view class="article-meta">
+			<text class="article-meta-text article-text">发布人昵称:</text>
+		  <text class="article-meta-text article-author">{{job.qqNickname}}</text>
+		</view>
+		<view class="article-meta">
+		  <text class="article-meta-text article-text">发布时间:</text>
+		  <text class="article-meta-text article-time">{{job.postAt}}</text>
+		</view>
+		<view class="article-meta">
+		  <text class="article-meta-text article-text">项目地点:</text>
+		  <text class="article-meta-text article-time">{{job.cityName}}</text>
+		</view>
+    <view class="comment-wrap"></view>
+		<view>
+				<uni-fab
+					:pattern="pattern"
+					:content="content"
+					:horizontal="horizontal"
+					@trigger="trigger"
+				></uni-fab>
+			</view>
+  </view>
+</template>
+
+<script setup>
+	import { ref } from 'vue';
+	import { onLoad } from '@dcloudio/uni-app';
+	import { setClipboardData } from '@/uni_modules/u-clipboard/js_sdk'
+	let job = ref({});
+	onLoad((options) => {
+		job.value.title = options.title
+		job.value.cityName = options.cityName
+		job.value.moduleName = options.moduleName
+		job.value.level = options.level
+		job.value.language = options.language
+		job.value.qq= options.qq
+		job.value.qqNickname= options.qqNickname
+		job.value.postAt= options.postAt
+		console.log('接收传值：',options)
+	});
+	const horizontal = ref("right");
+	const pattern = ref({
+					color: '#7A7E83',
+					backgroundColor: '#fff',
+					selectedColor: '#007AFF',
+					buttonColor: '#007AFF',
+					iconColor: '#fff'
+				});
+	let content = ref([{
+						iconPath: '/static/component.png',
+						selectedIconPath: '/static/image-active.png',
+						text: '获取QQ',
+						active: false
+					},
+					{
+						iconPath: '/static/template.png',
+						selectedIconPath: '/static/home-active.png',
+						text: '直接联系',
+						active: false
+					}
+				]);
+	function trigger(e) {
+		console.log(e)
+		content.value[e.index].active = !e.item.active
+		let tip = "";
+		if(e.index == 1){
+			tip = "该功能暂未实现，敬请期待！";
+		} 
+		if(e.index == 0){
+			tip = "猎头QQ已经复制，打开QQ去联系吧";
+			setClipboardData(job.value.qq);
+		} 
+		uni.showModal({
+			title: '提示',
+			content: tip,
+			success: function(res) {
+				if (res.confirm) {
+					console.log('用户点击确定')
+				} else if (res.cancel) {
+					console.log('用户点击取消')
+				}
+			}
+		})
+	};
+	//             pattern: { // 悬浮按钮
+	// 		buttonColor: '#6380E8'
+	// 	    },
+	// 	    horizontal: 'right', // 悬浮按钮: 水平对齐方式
+	// 	    vertical: 'bottom', // 悬浮按钮: 垂直对齐方式
+				
+</script>
+
+<style>
+  /* #ifndef APP-PLUS */
+  page {
+    min-height: 100%;
+  }
+
+  /* #endif */
+
+  .banner {
+    height: 180px;
+    position: relative;
+    background-color: #ccc;
+    flex-direction: row;
+    overflow: hidden;
+  }
+
+  .banner-img {
+    flex: 1;
+  }
+
+  .title-area {
+    position: absolute;
+    left: 15px;
+    right: 15px;
+    bottom: 15px;
+    z-index: 11;
+  }
+
+  .title-text {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+    lines: 2;
+    color: #ffffff;
+    overflow: hidden;
+  }
+
+  .article-meta {
+    padding: 10px 15px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .article-meta-text {
+    color: gray;
+  }
+
+  .article-text {
+    font-size: 12px;
+    line-height: 25px;
+    margin: 0 10px;
+  }
+
+  .article-author {
+    font-size: 15px;
+  }
+
+  .article-time {
+    font-size: 15px;
+  }
+
+  .article-content {
+    font-size: 15px;
+    padding: 0 15px;
+    margin-bottom: 15px;
+    overflow: hidden;
+  }
+
+  /* #ifdef H5 */
+
+  .article-content {
+    line-height: 1.8;
+  }
+
+  .article-content img {
+    max-width: 100%;
+  }
+
+  /* #endif */
+</style>
